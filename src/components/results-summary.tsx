@@ -1,6 +1,7 @@
 "use client";
 
 import type { SessionResult } from "@/types";
+import { formatSizeGb } from "@/lib/utils";
 
 interface ResultsSummaryProps {
   result: SessionResult;
@@ -11,9 +12,9 @@ export function ResultsSummary({ result }: ResultsSummaryProps) {
     <div className="space-y-6">
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="text-zinc-500">{result.original_size_gb.toFixed(1)} GB</span>
+          <span className="text-zinc-500">{formatSizeGb(result.original_size_gb)}</span>
           <span className="text-zinc-500">→</span>
-          <span className="text-zinc-500">{result.optimized_size_gb.toFixed(1)} GB</span>
+          <span className="text-zinc-500">{formatSizeGb(result.optimized_size_gb)}</span>
         </div>
         <div className="h-px bg-zinc-200">
           <div
@@ -22,7 +23,7 @@ export function ResultsSummary({ result }: ResultsSummaryProps) {
           />
         </div>
         <p className="text-sm text-zinc-600">
-          Liberar {result.savings_gb.toFixed(1)} GB ({result.savings_percentage}%)
+          Liberar {formatSizeGb(result.savings_gb)} ({result.savings_percentage}%)
         </p>
       </div>
 

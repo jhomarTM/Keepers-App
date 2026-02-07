@@ -6,6 +6,7 @@ import { Header } from "@/components/header";
 import { ResultsSummary } from "@/components/results-summary";
 import { VideoGrid } from "@/components/video-grid";
 import { ShortsPreview } from "@/components/shorts-preview";
+import { formatSizeGb } from "@/lib/utils";
 import type { SessionResult, VideoAnalysis } from "@/types";
 
 function buildResultFromStorage(data: Record<string, unknown>): SessionResult {
@@ -75,7 +76,7 @@ export default function ResultsPage() {
               className="w-full border border-zinc-900 bg-zinc-900 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
               onClick={() => alert("Descarga - integrar cuando Cloudinary/Groq estén listos")}
             >
-              Descargar ({result.optimized_size_gb.toFixed(1)} GB)
+              Descargar ({formatSizeGb(result.optimized_size_gb)})
             </button>
             <p className="text-center text-xs text-zinc-400">{result.folder_name}.zip</p>
           </div>

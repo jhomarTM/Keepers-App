@@ -9,7 +9,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="mt-auto border-t border-zinc-100 bg-zinc-50/30">
+    <footer className="border-t border-zinc-100 bg-zinc-50/30">
       <div className="mx-auto max-w-md px-5 py-6">
         <p className="mb-3 text-center text-xs text-zinc-500">
           Hecho con

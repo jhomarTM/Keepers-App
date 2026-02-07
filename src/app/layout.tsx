@@ -46,10 +46,10 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}
       >
         <ConcertProvider>
-          <main className="flex-1">{children}</main>
+          <main>{children}</main>
           <Footer />
         </ConcertProvider>
       </body>

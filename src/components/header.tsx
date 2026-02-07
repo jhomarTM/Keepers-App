@@ -5,7 +5,7 @@ interface HeaderProps {
   subtitle?: string;
 }
 
-export function Header({ title = "Concert Vault", subtitle }: HeaderProps) {
+export function Header({ title = "Keepers app", subtitle }: HeaderProps) {
   return (
     <header>
       <h1 className="text-xl font-medium text-zinc-900">{title}</h1>

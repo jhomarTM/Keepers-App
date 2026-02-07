@@ -2,6 +2,7 @@ export interface VideoAnalysis {
   id: string;
   filename: string;
   cloudinary_public_id: string;
+  video_url?: string; // URL para previsualización
 
   // Metadata
   duration: number; // segundos

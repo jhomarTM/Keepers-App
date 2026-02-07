@@ -122,7 +122,6 @@ export default function ProcessingPage() {
 
         setSteps((s) => s.map((x, i) => (i === 2 ? { ...x, status: "complete" as const } : i === 3 ? { ...x, status: "in_progress" as const } : x)));
 
-        const top3Ids = analysis?.top_shorts?.slice(0, 3).filter((id) => uploads.some((u) => u.public_id === id)) ?? uploads.slice(0, 3).map((u) => u.public_id);
         const decisions = analysis?.decisions ?? {};
 
         const keepers: UploadResult[] = [];
@@ -133,6 +132,13 @@ export default function ProcessingPage() {
           else deletable.push(u);
         }
         if (keepers.length === 0 && uploads.length > 0) keepers.push(uploads[0]);
+
+        const keeperIds = new Set(keepers.map((k) => k.public_id));
+        const top3Ids =
+          analysis?.top_shorts
+            ?.slice(0, 3)
+            .filter((id) => keeperIds.has(id) && uploads.some((u) => u.public_id === id)) ??
+          keepers.slice(0, 3).map((u) => u.public_id);
 
         const res = await fetch("/api/generate-shorts", {
           method: "POST",
@@ -158,6 +164,7 @@ export default function ProcessingPage() {
               id: String(i),
               filename: u.filename,
               cloudinary_public_id: u.public_id,
+              video_url: u.url,
               duration: u.duration ?? 0,
               size_mb: u.size_mb,
               created_at: "",
@@ -172,6 +179,7 @@ export default function ProcessingPage() {
               id: String(i),
               filename: u.filename,
               cloudinary_public_id: u.public_id,
+              video_url: u.url,
               duration: u.duration ?? 0,
               size_mb: u.size_mb,
               created_at: "",
@@ -261,7 +269,6 @@ export default function ProcessingPage() {
 
       setSteps((s) => s.map((x, i) => (i === 2 ? { ...x, status: "complete" as const } : i === 3 ? { ...x, status: "in_progress" as const } : x)));
 
-      const top3Ids = analysis?.top_shorts?.slice(0, 3).filter((id) => uploads.some((u) => u.public_id === id)) ?? uploads.slice(0, 3).map((u) => u.public_id);
       const decisions = analysis?.decisions ?? {};
 
       const keepers: typeof uploads = [];
@@ -272,6 +279,13 @@ export default function ProcessingPage() {
         else deletable.push(u);
       }
       if (keepers.length === 0 && uploads.length > 0) keepers.push(uploads[0]);
+
+      const keeperIds = new Set(keepers.map((k) => k.public_id));
+      const top3Ids =
+        analysis?.top_shorts
+          ?.slice(0, 3)
+          .filter((id) => keeperIds.has(id) && uploads.some((u) => u.public_id === id)) ??
+        keepers.slice(0, 3).map((u) => u.public_id);
 
       try {
         const res = await fetch("/api/generate-shorts", {
@@ -298,6 +312,7 @@ export default function ProcessingPage() {
               id: String(i),
               filename: u.filename,
               cloudinary_public_id: u.public_id,
+              video_url: u.url,
               duration: u.duration ?? 0,
               size_mb: u.size_mb,
               created_at: "",
@@ -312,6 +327,7 @@ export default function ProcessingPage() {
               id: String(i),
               filename: u.filename,
               cloudinary_public_id: u.public_id,
+              video_url: u.url,
               duration: u.duration ?? 0,
               size_mb: u.size_mb,
               created_at: "",

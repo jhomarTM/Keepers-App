@@ -13,13 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Concert Vault - Libera espacio. Quédate con lo mejor.",
+  title: "Keepers app - Libera espacio. Quédate con lo mejor.",
   description: "Analiza videos de conciertos, identifica cuáles borrar y genera los mejores shorts para Instagram Stories.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Concert Vault",
+    title: "Keepers app",
   },
 };
 

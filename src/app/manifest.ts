@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Concert Vault",
-    short_name: "Concert Vault",
+    name: "Keepers app",
+    short_name: "Keepers app",
     description: "Libera espacio. Analiza videos de conciertos y genera los mejores shorts para Stories.",
     start_url: "/",
     display: "standalone",

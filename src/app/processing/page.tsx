@@ -84,19 +84,15 @@ export default function ProcessingPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      <div className="mx-auto max-w-2xl px-6 py-16">
-        <Header subtitle="Analizando tu concierto..." />
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-md px-5 py-12">
+        <Header subtitle="Analizando…" />
 
         <div className="mt-12 space-y-8">
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <ProgressBar items={progressItems} />
-            <p className="mt-4 text-center text-sm text-zinc-500">
-              Subiendo {progressItems.filter((i) => i.status === "complete").length} de{" "}
-              {progressItems.length} videos...
-            </p>
-          </div>
-
+          <ProgressBar items={progressItems} />
+          <p className="text-center text-xs text-zinc-400">
+            {progressItems.filter((i) => i.status === "complete").length} / {progressItems.length}
+          </p>
           <ProcessingSteps steps={steps} />
         </div>
       </div>

@@ -8,23 +8,15 @@ interface ProcessingStepsProps {
 
 export function ProcessingSteps({ steps }: ProcessingStepsProps) {
   return (
-    <div className="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50/50 p-4">
+    <div className="space-y-2 text-xs">
       {steps.map((step) => (
-        <div key={step.id} className="flex items-center gap-3">
-          <span className="text-lg">
-            {step.status === "complete" && "☑️"}
-            {step.status === "in_progress" && "⏳"}
-            {step.status === "pending" && "⬜"}
+        <div key={step.id} className="flex items-center gap-2">
+          <span className="w-4 text-zinc-400">
+            {step.status === "complete" && "✓"}
+            {step.status === "in_progress" && "…"}
+            {step.status === "pending" && "·"}
           </span>
-          <span
-            className={
-              step.status === "complete"
-                ? "text-zinc-700 line-through"
-                : step.status === "in_progress"
-                  ? "font-medium text-zinc-900"
-                  : "text-zinc-500"
-            }
-          >
+          <span className={step.status === "complete" ? "text-zinc-400 line-through" : "text-zinc-600"}>
             {step.label}
           </span>
         </div>

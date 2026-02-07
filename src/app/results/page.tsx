@@ -98,56 +98,29 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      <div className="mx-auto max-w-2xl px-6 py-16">
-        <Header
-          subtitle={`${result.artist} • ${result.date} • ${result.city}`}
-        />
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-md px-5 py-12">
+        <Header subtitle={`${result.artist} · ${result.date}`} />
 
-        <div className="mt-12 space-y-10">
+        <div className="mt-12 space-y-8">
           <ResultsSummary result={result} />
-
-          <VideoGrid
-            keepers={result.keepers}
-            deletable={result.deletable}
-            title="Ver videos"
-          />
-
+          <VideoGrid keepers={result.keepers} deletable={result.deletable} />
           <ShortsPreview result={result} />
 
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-zinc-800">📦 DESCARGAR</h2>
-            <div className="rounded-xl border border-zinc-200 bg-white p-4">
-              <p className="font-mono text-sm text-zinc-700">
-                📁 {result.folder_name}.zip
-              </p>
-              <p className="mt-1 text-xs text-zinc-500">
-                ├── 📁 Keepers/ ({result.keepers.length} videos)
-              </p>
-              <p className="text-xs text-zinc-500">
-                └── 📁 Stories/ (3 shorts)
-              </p>
-            </div>
-
+          <div className="space-y-4 border-t border-zinc-100 pt-8">
             <button
               type="button"
-              className="w-full rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 py-4 font-semibold text-amber-800 transition-colors hover:bg-amber-100"
+              className="w-full border border-zinc-900 bg-zinc-900 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
               onClick={() => alert("Descarga - integrar cuando Cloudinary/Groq estén listos")}
             >
-              ⬇️ DESCARGAR TODO ({result.optimized_size_gb.toFixed(1)} GB)
+              Descargar ({result.optimized_size_gb.toFixed(1)} GB)
             </button>
-
-            <p className="text-center text-sm text-zinc-500">
-              💡 Tip: Descomprime y copia la carpeta a tu galería
-            </p>
+            <p className="text-center text-xs text-zinc-400">{result.folder_name}.zip</p>
           </div>
 
-          <div className="pt-8 text-center">
-            <Link
-              href="/"
-              className="text-amber-600 hover:text-amber-700 hover:underline"
-            >
-              ← Analizar otro concierto
+          <div className="pt-4 text-center">
+            <Link href="/" className="text-xs text-zinc-500 underline hover:text-zinc-700">
+              Nuevo análisis
             </Link>
           </div>
         </div>

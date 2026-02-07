@@ -86,8 +86,7 @@ export function UploadZone({ onFilesSelected, selectedFiles }: UploadZoneProps) 
   };
 
   return (
-    <div className="space-y-4">
-      {/* Inputs ocultos: uno para galería (sin capture) y otro para cámara */}
+    <div className="space-y-3">
       <input
         ref={galleryInputRef}
         type="file"
@@ -112,75 +111,50 @@ export function UploadZone({ onFilesSelected, selectedFiles }: UploadZoneProps) 
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
+        onClick={() => galleryInputRef.current?.click()}
         className={`
-          relative rounded-xl border-2 border-dashed p-8 text-center transition-colors
-          min-h-[160px] touch-manipulation
-          ${isDragOver ? "border-amber-500 bg-amber-50/50" : "border-zinc-300 hover:border-zinc-400 active:border-amber-500"}
+          min-h-[120px] cursor-pointer border border-dashed transition-colors touch-manipulation
+          flex flex-col items-center justify-center
+          ${isDragOver ? "border-zinc-400 bg-zinc-50" : "border-zinc-200 hover:border-zinc-300"}
         `}
       >
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => galleryInputRef.current?.click()}
-          onKeyDown={(e) => e.key === "Enter" && galleryInputRef.current?.click()}
-          className="flex min-h-[140px] cursor-pointer flex-col items-center justify-center gap-2"
-        >
-          <span className="text-4xl">📁</span>
-          <p className="text-base font-medium text-zinc-700 md:text-lg">
-            Arrastra o toca para adjuntar
-          </p>
-          <p className="text-sm text-zinc-500">Desde tu galería o dispositivo</p>
+        <p className="text-sm text-zinc-500">Arrastra o toca para seleccionar</p>
+        <div className="mt-2 flex gap-2">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); galleryInputRef.current?.click(); }}
+            className="text-xs text-zinc-400 underline hover:text-zinc-600"
+          >
+            Galería
+          </button>
+          <span className="text-zinc-300">·</span>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }}
+            className="text-xs text-zinc-400 underline hover:text-zinc-600"
+          >
+            Cámara
+          </button>
         </div>
       </div>
 
-      {/* Botones explícitos para móvil: Galería y Cámara */}
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={() => galleryInputRef.current?.click()}
-          className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 active:bg-amber-50 touch-manipulation"
-        >
-          <span>🖼️</span>
-          Desde galería
-        </button>
-        <button
-          type="button"
-          onClick={() => cameraInputRef.current?.click()}
-          className="flex min-h-[48px] items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 active:bg-amber-50 touch-manipulation"
-        >
-          <span>📷</span>
-          Grabar nuevo
-        </button>
-      </div>
-      <p className="text-center text-xs text-zinc-400">Formatos: MP4, MOV, M4V • Máx. {MAX_VIDEO_SIZE_MB} MB por video</p>
-
-      {error && (
-        <p className="text-sm text-rose-600">{error}</p>
-      )}
+      {error && <p className="text-xs text-zinc-500">{error}</p>}
 
       {selectedFiles.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-zinc-600">
-            {selectedFiles.length} video(s) seleccionado(s)
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {selectedFiles.map((file, i) => (
-              <span
-                key={`${file.name}-${i}`}
-                className="inline-flex items-center gap-1 rounded-lg bg-zinc-100 px-3 py-1.5 text-sm"
+        <div className="space-y-1.5">
+          {selectedFiles.map((file, i) => (
+            <div key={`${file.name}-${i}`} className="flex items-center justify-between text-sm">
+              <span className="truncate text-zinc-600">{file.name}</span>
+              <button
+                type="button"
+                onClick={() => removeFile(i)}
+                className="shrink-0 text-zinc-400 hover:text-zinc-600"
+                aria-label="Eliminar"
               >
-                {file.name}
-                <button
-                  type="button"
-                  onClick={() => removeFile(i)}
-                  className="ml-1 text-zinc-500 hover:text-rose-600"
-                  aria-label="Eliminar"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
+                ×
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>

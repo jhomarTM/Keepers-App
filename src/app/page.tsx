@@ -23,40 +23,35 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      <div className="mx-auto max-w-2xl px-6 py-16">
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-md px-5 py-12">
         <Header />
 
-        <div className="mt-8">
+        <div className="mt-6">
           <InstallPrompt />
         </div>
 
-        <div className="mt-12 space-y-8">
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <label htmlFor="artist" className="block text-sm font-medium text-zinc-700">
-              ¿De qué concierto son estos videos?
-            </label>
+        <div className="mt-12 space-y-6">
+          <div>
             <input
               id="artist"
               type="text"
               value={artist}
               onChange={(e) => setArtist(e.target.value)}
-              placeholder="ej. Bad Bunny, Taylor Swift..."
-              className="mt-2 w-full rounded-lg border border-zinc-300 px-4 py-3 text-zinc-800 placeholder-zinc-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+              placeholder="Nombre del artista"
+              className="w-full border-b border-zinc-200 bg-transparent py-3 text-zinc-900 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none"
             />
           </div>
 
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <UploadZone onFilesSelected={setFiles} selectedFiles={files} />
-          </div>
+          <UploadZone onFilesSelected={setFiles} selectedFiles={files} />
 
           <button
             type="button"
             onClick={handleAnalyze}
             disabled={files.length === 0}
-            className="w-full rounded-xl bg-amber-500 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full border border-zinc-900 bg-zinc-900 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            🚀 Analizar videos
+            Analizar
           </button>
         </div>
       </div>

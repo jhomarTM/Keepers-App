@@ -21,6 +21,18 @@ export default function Home() {
       <div className="mx-auto max-w-md px-5 py-12">
         <Header />
 
+        <div className="mt-4 space-y-2 rounded-lg border border-zinc-100 bg-zinc-50/50 px-4 py-3">
+          <p className="text-xs leading-relaxed text-zinc-600">
+            <span className="font-medium text-zinc-700">Problema</span> — Videos de conciertos que ocupan espacio sin saber cuáles borrar.
+          </p>
+          <p className="text-xs leading-relaxed text-zinc-600">
+            <span className="font-medium text-zinc-700">Valor</span> — Detectamos cuáles eliminar y generamos los 3 mejores shorts.
+          </p>
+          <p className="text-xs leading-relaxed text-zinc-600">
+            <span className="font-medium text-zinc-700">Uso</span> — Sube videos, analizamos y te decimos qué guardar.
+          </p>
+        </div>
+
         <div className="mt-6">
           <InstallPrompt />
         </div>

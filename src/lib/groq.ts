@@ -5,6 +5,8 @@ interface VideoInput {
   filename: string;
   size_mb: number;
   duration?: number;
+  width?: number;
+  height?: number;
 }
 
 interface GroqDecision {
@@ -18,37 +20,32 @@ export async function analyzeVideos(videos: VideoInput[]): Promise<GroqDecision>
   if (!apiKey) throw new Error("GROQ_API_KEY no configurada");
 
   const groq = new Groq({ apiKey });
-  const prompt = `Eres un asistente experto en análisis de videos de conciertos.
+  const prompt = `Eres un experto en curaduría de videos de conciertos. Tu objetivo es identificar qué videos BORRAR para liberar espacio, conservando solo los buenos.
 
-Tu tarea es analizar los datos de cada video y decidir:
-- KEEP: Videos que vale la pena conservar (buen tamaño, nombre sugiere momento relevante)
-- DELETE: Videos que se pueden borrar (muy pequeños, posibles duplicados por nombre)
-- DUPLICATE: Videos muy similares a otros (conservar el mejor)
-
-Datos de los videos:
+Datos de cada video (id, filename, size_mb, duration en segundos, width, height en píxeles):
 ${JSON.stringify(videos, null, 2)}
 
-Reglas de decisión:
-1. Videos muy cortos (< 3 segundos aprox, size_mb < 5) → DELETE
-2. Nombres muy similares (ej: video_001, video_002 del mismo evento) → elegir KEEP para los mejores, DUPLICATE para el resto
-3. El resto → KEEP
+Acciones:
+- DELETE: Videos que NO vale la pena conservar. DEBES marcar como DELETE cuando:
+  * Duración muy corta (< 5 segundos) → fragmentos sin valor
+  * Baja resolución (width < 720 O height < 480) → calidad pobre
+  * Tamaño muy pequeño para la duración: si size_mb < 2 para un video > 30 seg → compresión alta, mala calidad
+  * Nombres que sugieren grabación accidental: IMG_, VID_, screen, capture, grabación, etc.
+  * Videos de menos de 1 MB con duración > 10 seg → imposible que sea buena calidad
+- DUPLICATE: Muy similares a otro (mismo evento, nombres consecutivos). KEEP el mejor, DUPLICATE el resto.
+- KEEP: Solo videos con buena duración, resolución aceptable y que parecen momentos relevantes del concierto.
 
-Para el TOP 3 SHORTS, selecciona los 3 videos con id que prefieras para clips de 5 seg en 9:16. Prioriza variedad.
+IMPORTANTE: NO marques todo como KEEP. Si hay videos malos (cortos, baja resolución, mala calidad), márcalos como DELETE. El usuario quiere distinguir entre guardar y borrar.
 
-Responde SOLO en JSON válido, sin markdown ni texto extra:
+Para top_shorts: los 3 mejores ids para clips de 5 seg en 9:16. Prioriza resolución y variedad.
+
+Responde SOLO JSON válido, sin markdown:
 {
   "decisions": {
-    "video_id": {
-      "action": "KEEP" | "DELETE" | "DUPLICATE",
-      "reason": "explicación breve"
-    }
+    "id_del_video": { "action": "KEEP" | "DELETE" | "DUPLICATE", "reason": "motivo breve" }
   },
-  "top_shorts": ["video_id_1", "video_id_2", "video_id_3"],
-  "summary": {
-    "total_keepers": number,
-    "total_deletable": number,
-    "total_duplicates": number
-  }
+  "top_shorts": ["id1", "id2", "id3"],
+  "summary": { "total_keepers": N, "total_deletable": N, "total_duplicates": N }
 }`;
 
   const completion = await groq.chat.completions.create({

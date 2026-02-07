@@ -3,10 +3,19 @@
  * Evita FUNCTION_PAYLOAD_TOO_LARGE (413) en Vercel: el archivo no pasa por nuestro servidor.
  */
 
+export interface UploadVideoResult {
+  public_id: string;
+  secure_url: string;
+  duration?: number;
+  width?: number;
+  height?: number;
+  bytes?: number;
+}
+
 export async function uploadVideoDirect(
   file: File,
   onProgress?: (percent: number) => void
-): Promise<{ public_id: string; secure_url: string; duration?: number }> {
+): Promise<UploadVideoResult> {
   const res = await fetch("/api/upload-signature");
   if (!res.ok) throw new Error("No se pudo obtener la firma");
   const { signature, timestamp, api_key, cloud_name } = await res.json();
@@ -22,7 +31,7 @@ export async function uploadVideoDirect(
   const xhr = new XMLHttpRequest();
   xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloud_name}/video/upload`);
 
-  const result = await new Promise<{ public_id: string; secure_url: string; duration?: number }>((resolve, reject) => {
+  const result = await new Promise<UploadVideoResult>((resolve, reject) => {
     xhr.upload.addEventListener("progress", (e) => {
       if (e.lengthComputable && onProgress) {
         onProgress(Math.round((e.loaded / e.total) * 100));
@@ -36,6 +45,9 @@ export async function uploadVideoDirect(
           public_id: data.public_id,
           secure_url: data.secure_url,
           duration: data.duration,
+          width: data.width,
+          height: data.height,
+          bytes: data.bytes,
         });
       } else {
         try {

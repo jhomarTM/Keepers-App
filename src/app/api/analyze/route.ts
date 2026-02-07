@@ -14,12 +14,16 @@ export async function POST(request: Request) {
       );
     }
 
-    const videoData = videos.map((v: { id: string; filename: string; size_mb: number; duration?: number }) => ({
-      id: v.id,
-      filename: v.filename,
-      size_mb: v.size_mb,
-      duration: v.duration,
-    }));
+    const videoData = videos.map(
+      (v: { id: string; filename: string; size_mb: number; duration?: number; width?: number; height?: number }) => ({
+        id: v.id,
+        filename: v.filename,
+        size_mb: v.size_mb,
+        duration: v.duration,
+        width: v.width,
+        height: v.height,
+      })
+    );
 
     if (!process.env.XAI_API_KEY && !process.env.GROQ_API_KEY) {
       const decisions: Record<string, { action: string; reason: string }> = {};

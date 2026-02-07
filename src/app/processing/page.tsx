@@ -15,6 +15,15 @@ interface UploadResult {
   url: string;
   size_mb: number;
   duration?: number;
+  width?: number;
+  height?: number;
+}
+
+function heuristicDecision(u: UploadResult): "KEEP" | "DELETE" {
+  if (u.duration != null && u.duration < 5) return "DELETE";
+  if (u.size_mb < 1 && (u.duration ?? 0) > 10) return "DELETE";
+  if (u.width != null && u.height != null && (u.width < 720 || u.height < 480)) return "DELETE";
+  return "KEEP";
 }
 
 export default function ProcessingPage() {
@@ -65,6 +74,8 @@ export default function ProcessingPage() {
             url: data.secure_url,
             size_mb: files[i].size / (1024 * 1024),
             duration: data.duration,
+            width: data.width,
+            height: data.height,
           });
 
           setProgressItems((prev) => prev.map((p, j) => (j === i ? { ...p, progress: 100, status: "complete" as const } : p)));
@@ -84,11 +95,25 @@ export default function ProcessingPage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              videos: uploads.map((u) => ({ id: u.public_id, filename: u.filename, size_mb: u.size_mb, duration: u.duration })),
+              videos: uploads.map((u) => ({
+                id: u.public_id,
+                filename: u.filename,
+                size_mb: u.size_mb,
+                duration: u.duration,
+                width: u.width,
+                height: u.height,
+              })),
             }),
           });
-          if (analyzeRes.ok) analysis = await analyzeRes.json();
-        } catch {}
+          if (analyzeRes.ok) {
+            analysis = await analyzeRes.json();
+          } else {
+            const errText = await analyzeRes.text();
+            console.error("Analyze API error:", analyzeRes.status, errText);
+          }
+        } catch (e) {
+          console.error("Analyze failed:", e);
+        }
 
         if (cancelled) return;
         setSteps((s) => s.map((x, i) => (i === 1 ? { ...x, status: "complete" as const } : i === 2 ? { ...x, status: "in_progress" as const } : x)));
@@ -103,7 +128,7 @@ export default function ProcessingPage() {
         const keepers: UploadResult[] = [];
         const deletable: UploadResult[] = [];
         for (const u of uploads) {
-          const action = decisions[u.public_id]?.action ?? "KEEP";
+          const action = decisions[u.public_id]?.action ?? heuristicDecision(u);
           if (action === "KEEP" || action === "DUPLICATE") keepers.push(u);
           else deletable.push(u);
         }
@@ -210,11 +235,24 @@ export default function ProcessingPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            videos: uploads.map((u) => ({ id: u.public_id, filename: u.filename, size_mb: u.size_mb, duration: u.duration })),
+            videos: uploads.map((u) => ({
+              id: u.public_id,
+              filename: u.filename,
+              size_mb: u.size_mb,
+              duration: u.duration,
+              width: u.width,
+              height: u.height,
+            })),
           }),
         });
-        if (analyzeRes.ok) analysis = await analyzeRes.json();
-      } catch {}
+        if (analyzeRes.ok) {
+          analysis = await analyzeRes.json();
+        } else {
+          console.error("Analyze API error:", analyzeRes.status, await analyzeRes.text());
+        }
+      } catch (e) {
+        console.error("Analyze failed:", e);
+      }
 
       if (cancelled) return;
       setSteps((s) => s.map((x, i) => (i === 1 ? { ...x, status: "complete" as const } : i === 2 ? { ...x, status: "in_progress" as const } : x)));
@@ -229,8 +267,7 @@ export default function ProcessingPage() {
       const keepers: typeof uploads = [];
       const deletable: typeof uploads = [];
       for (const u of uploads) {
-        const d = decisions[u.public_id];
-        const action = d?.action ?? "KEEP";
+        const action = decisions[u.public_id]?.action ?? heuristicDecision(u);
         if (action === "KEEP" || action === "DUPLICATE") keepers.push(u);
         else deletable.push(u);
       }

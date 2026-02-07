@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
-
-/**
- * API Analyze - Integración Groq COMENTADA
- * Descomentar cuando GROQ_API_KEY esté configurada
- */
-
-// import { analyzeVideos } from "@/lib/groq";
+import { analyzeVideos } from "@/lib/groq";
+import { analyzeVideosWithXAI } from "@/lib/xai";
 
 export async function POST(request: Request) {
   try {
@@ -19,30 +14,34 @@ export async function POST(request: Request) {
       );
     }
 
-    // ========== INTEGRACIÓN GROQ - COMENTADA ==========
-    // const decision = await analyzeVideos(videos);
-    // return NextResponse.json(decision);
+    const videoData = videos.map((v: { id: string; filename: string; size_mb: number; duration?: number }) => ({
+      id: v.id,
+      filename: v.filename,
+      size_mb: v.size_mb,
+      duration: v.duration,
+    }));
 
-    // Respuesta mock hasta integrar - reglas simples locales
-    const decisions: Record<string, { action: string; reason: string }> = {};
-    videos.forEach((v: { id: string; quality_score?: number }) => {
-      const score = v.quality_score ?? 50;
-      decisions[v.id] = {
-        action: score >= 40 ? "KEEP" : "DELETE",
-        reason: score >= 40 ? "Calidad aceptable" : "Calidad baja",
-      };
-    });
+    if (!process.env.XAI_API_KEY && !process.env.GROQ_API_KEY) {
+      const decisions: Record<string, { action: string; reason: string }> = {};
+      videos.forEach((v: { id: string }) => {
+        decisions[v.id] = { action: "KEEP", reason: "Sin API configurada" };
+      });
+      return NextResponse.json({
+        decisions,
+        top_shorts: videos.slice(0, 3).map((v: { id: string }) => v.id),
+        summary: { total_keepers: videos.length, total_deletable: 0, total_duplicates: 0 },
+      });
+    }
 
-    return NextResponse.json({
-      decisions,
-      top_shorts: videos.slice(0, 3).map((v: { id: string }) => v.id),
-      summary: {
-        total_keepers: Object.values(decisions).filter((d) => d.action === "KEEP").length,
-        total_deletable: Object.values(decisions).filter((d) => d.action === "DELETE").length,
-        total_duplicates: 0,
-      },
-      message: "Análisis mock - integrar Groq",
-    });
+    // Prioridad: xAI (Grok) primero, luego Groq
+    let decision;
+    if (process.env.XAI_API_KEY) {
+      decision = await analyzeVideosWithXAI(videoData);
+    } else {
+      decision = await analyzeVideos(videoData);
+    }
+
+    return NextResponse.json(decision);
   } catch (error) {
     console.error("Analyze error:", error);
     return NextResponse.json(

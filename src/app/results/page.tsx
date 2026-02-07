@@ -8,75 +8,26 @@ import { VideoGrid } from "@/components/video-grid";
 import { ShortsPreview } from "@/components/shorts-preview";
 import type { SessionResult, VideoAnalysis } from "@/types";
 
-// Mock data para la UI - sin Cloudinary/Groq integrados
-function getMockResult(artist: string): SessionResult {
-  const keepers: VideoAnalysis[] = [
-    {
-      id: "1",
-      filename: "clima_001.mov",
-      cloudinary_public_id: "mock_1",
-      duration: 45,
-      size_mb: 120,
-      created_at: "2024-06-15",
-      quality_score: 85,
-      is_blurry: false,
-      is_dark: false,
-      phash: "abc123",
-      decision: "keep",
-      reason: "Buena calidad",
-    },
-    {
-      id: "2",
-      filename: "clima_002.mov",
-      cloudinary_public_id: "mock_2",
-      duration: 38,
-      size_mb: 95,
-      created_at: "2024-06-15",
-      quality_score: 78,
-      is_blurry: false,
-      is_dark: false,
-      phash: "def456",
-      decision: "keep",
-      reason: "Momento único",
-    },
-  ];
-
-  const deletable: VideoAnalysis[] = [
-    {
-      id: "3",
-      filename: "clima_003.mov",
-      cloudinary_public_id: "mock_3",
-      duration: 12,
-      size_mb: 320,
-      created_at: "2024-06-15",
-      quality_score: 25,
-      is_blurry: true,
-      is_dark: true,
-      phash: "ghi789",
-      decision: "delete",
-      reason: "Borroso y oscuro",
-    },
-  ];
+function buildResultFromStorage(data: Record<string, unknown>): SessionResult {
+  const keepers = (data.keepers as VideoAnalysis[]) || [];
+  const deletable = (data.deletable as VideoAnalysis[]) || [];
+  const shorts = (data.shorts as { video_id: string; short_url: string; thumbnail_url: string }[]) || [];
 
   return {
-    artist,
-    date: "15 Jun 2024",
-    city: "Lima",
-    total_videos: 3,
+    artist: (data.artist as string) || "Artista",
+    date: (data.date as string) || new Date().toLocaleDateString("es"),
+    city: (data.city as string) || "",
+    total_videos: keepers.length + deletable.length,
     keepers,
     deletable,
     duplicates: [],
-    original_size_gb: 7.5,
-    optimized_size_gb: 1.8,
-    savings_gb: 5.7,
-    savings_percentage: 76,
-    top_shorts: [
-      { video_id: "1", short_url: "", thumbnail_url: "" },
-      { video_id: "2", short_url: "", thumbnail_url: "" },
-      { video_id: "1", short_url: "", thumbnail_url: "" },
-    ],
+    original_size_gb: (data.original_size_gb as number) || 0,
+    optimized_size_gb: (data.optimized_size_gb as number) || 0,
+    savings_gb: (data.savings_gb as number) || 0,
+    savings_percentage: (data.savings_percentage as number) || 0,
+    top_shorts: shorts.length > 0 ? shorts : [{ video_id: "", short_url: "", thumbnail_url: "" }],
     zip_url: "",
-    folder_name: `Concert_${artist.replace(/\s/g, "")}_2024-06-15_Lima`,
+    folder_name: (data.folder_name as string) || "Concert",
   };
 }
 
@@ -85,14 +36,25 @@ export default function ResultsPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const artist = sessionStorage.getItem("concert_artist") || "Artista";
-    setResult(getMockResult(artist));
+    const stored = sessionStorage.getItem("concert_result");
+    if (stored) {
+      try {
+        setResult(buildResultFromStorage(JSON.parse(stored)));
+      } catch {
+        setResult(null);
+      }
+    } else {
+      setResult(null);
+    }
   }, []);
 
   if (!result) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-zinc-500">Cargando resultados...</p>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+        <p className="text-zinc-500">No hay resultados.</p>
+        <Link href="/" className="text-xs text-zinc-500 underline hover:text-zinc-700">
+          Volver
+        </Link>
       </div>
     );
   }

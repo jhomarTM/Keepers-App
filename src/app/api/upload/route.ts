@@ -1,16 +1,10 @@
 import { NextResponse } from "next/server";
-
-/**
- * API Upload - Integración Cloudinary COMENTADA
- * Descomentar cuando CLOUDINARY_* env vars estén configuradas
- */
-
-// import { uploadVideo } from "@/lib/cloudinary";
+import { uploadVideo } from "@/lib/cloudinary";
 
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file") as File | null;
 
     if (!file) {
       return NextResponse.json(
@@ -19,19 +13,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // ========== INTEGRACIÓN CLOUDINARY - COMENTADA ==========
-    // const result = await uploadVideo(file);
-    // return NextResponse.json({
-    //   public_id: result.public_id,
-    //   url: result.secure_url,
-    //   ...result.quality_analysis,
-    // });
-
-    // Respuesta mock hasta integrar
+    const result = await uploadVideo(file);
     return NextResponse.json({
-      public_id: `mock_${Date.now()}`,
-      url: URL.createObjectURL(file),
-      message: "Upload deshabilitado - integrar Cloudinary",
+      public_id: result.public_id,
+      url: result.secure_url,
+      duration: result.duration ?? undefined,
     });
   } catch (error) {
     console.error("Upload error:", error);

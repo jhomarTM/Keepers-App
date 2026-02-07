@@ -1,5 +1,3 @@
-import Groq from "groq-sdk";
-
 interface VideoInput {
   id: string;
   filename: string;
@@ -7,17 +5,16 @@ interface VideoInput {
   duration?: number;
 }
 
-interface GroqDecision {
+interface AnalyzeDecision {
   decisions: Record<string, { action: string; reason: string }>;
   top_shorts: string[];
   summary: { total_keepers: number; total_deletable: number; total_duplicates: number };
 }
 
-export async function analyzeVideos(videos: VideoInput[]): Promise<GroqDecision> {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) throw new Error("GROQ_API_KEY no configurada");
+export async function analyzeVideosWithXAI(videos: VideoInput[]): Promise<AnalyzeDecision> {
+  const apiKey = process.env.XAI_API_KEY;
+  if (!apiKey) throw new Error("XAI_API_KEY no configurada");
 
-  const groq = new Groq({ apiKey });
   const prompt = `Eres un asistente experto en análisis de videos de conciertos.
 
 Tu tarea es analizar los datos de cada video y decidir:
@@ -51,21 +48,34 @@ Responde SOLO en JSON válido, sin markdown ni texto extra:
   }
 }`;
 
-  const completion = await groq.chat.completions.create({
-    model: "llama-3.1-70b-versatile",
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.2,
+  const res = await fetch("https://api.x.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "grok-4-latest",
+      messages: [{ role: "user", content: prompt }],
+      stream: false,
+      temperature: 0.2,
+    }),
   });
 
-  const content = completion.choices[0]?.message?.content?.trim();
-  if (!content) throw new Error("Empty response from Groq");
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`xAI API error: ${res.status} ${err}`);
+  }
 
-  // Limpiar posible markdown
+  const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+  const content = data.choices?.[0]?.message?.content?.trim();
+  if (!content) throw new Error("Empty response from xAI");
+
   const jsonStr = content.replace(/```json\n?|\n?```/g, "").trim();
-  const parsed = JSON.parse(jsonStr) as GroqDecision;
+  const parsed = JSON.parse(jsonStr) as AnalyzeDecision;
 
   if (!parsed.decisions || !parsed.top_shorts || !parsed.summary) {
-    throw new Error("Invalid Groq response format");
+    throw new Error("Invalid xAI response format");
   }
 
   return parsed;

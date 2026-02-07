@@ -1,11 +1,5 @@
 import { NextResponse } from "next/server";
-
-/**
- * API Generate Shorts - Integración Cloudinary COMENTADA
- * Descomentar cuando CLOUDINARY_* env vars estén configuradas
- */
-
-// import { getShortUrl } from "@/lib/cloudinary";
+import { getShortUrl, getThumbnailUrl } from "@/lib/cloudinary";
 
 export async function POST(request: Request) {
   try {
@@ -19,25 +13,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // ========== INTEGRACIÓN CLOUDINARY - COMENTADA ==========
-    // const shorts = public_ids.map((id: string) => ({
-    //   video_id: id,
-    //   short_url: getShortUrl(id),
-    //   thumbnail_url: getShortUrl(id) + ".jpg",
-    // }));
-    // return NextResponse.json({ shorts });
-
-    // Respuesta mock hasta integrar
     const shorts = public_ids.map((id: string) => ({
       video_id: id,
-      short_url: "",
-      thumbnail_url: "",
+      short_url: getShortUrl(id),
+      thumbnail_url: getThumbnailUrl(id),
     }));
 
-    return NextResponse.json({
-      shorts,
-      message: "Shorts mock - integrar Cloudinary",
-    });
+    return NextResponse.json({ shorts });
   } catch (error) {
     console.error("Generate shorts error:", error);
     return NextResponse.json(

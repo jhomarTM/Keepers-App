@@ -6,6 +6,7 @@ import { Header } from "@/components/header";
 import { ProgressBar } from "@/components/progress-bar";
 import { ProcessingSteps } from "@/components/processing-steps";
 import { useConcert } from "@/context/concert-context";
+import { uploadVideoDirect } from "@/lib/cloudinary-client";
 import type { UploadProgress, ProcessingStep } from "@/types";
 
 interface UploadResult {
@@ -55,20 +56,13 @@ export default function ProcessingPage() {
             )
           );
 
-          const formData = new FormData();
-          formData.append("file", files[i]);
-
-          const res = await fetch("/api/upload", { method: "POST", body: formData });
-          if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.error || "Error al subir");
-          }
-
-          const data = await res.json();
+          const data = await uploadVideoDirect(files[i], (p) => {
+            setProgressItems((prev) => prev.map((pp, j) => (j === i ? { ...pp, progress: p } : pp)));
+          });
           results.push({
             filename: files[i].name,
             public_id: data.public_id,
-            url: data.url,
+            url: data.secure_url,
             size_mb: files[i].size / (1024 * 1024),
             duration: data.duration,
           });

@@ -20,9 +20,11 @@ export async function POST(request: Request) {
       duration: result.duration ?? undefined,
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Error al subir el video";
+    const details = error instanceof Error && "error" in error ? String((error as { error?: unknown }).error) : "";
     console.error("Upload error:", error);
     return NextResponse.json(
-      { error: "Error al subir el video" },
+      { error: message + (details ? ` - ${details}` : "") },
       { status: 500 }
     );
   }
